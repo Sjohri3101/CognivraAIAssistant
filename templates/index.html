@@ -1,0 +1,1041 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<style>
+    .chat-item.active {
+
+        background: #19c37d;
+
+        color: white;
+    }
+
+    .chat-item.active .delete-chat {
+
+        color: white;
+    }
+
+    table tbody tr.selected {
+
+        background: #355;
+
+    }
+
+    table tbody tr:hover {
+
+        cursor: pointer;
+
+    }
+
+    .delete-chat i {
+
+        font-size: 15px;
+    }
+
+    
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-title">
+
+    <!-- <i class="fa-solid fa-robot"></i> -->
+    <!-- 🤖MCP AI Assitant🤖<h6>(Powered by Groq)</h6> -->
+
+</div>
+
+<div class="messages" id="messages">
+    <div class="message bot">
+
+        <div class="bubble">
+
+            <h3>👋 Welcome to Cognivra your AI Assistant!</h3>
+
+           How can i help you ?
+
+            <!-- <br><br>
+
+            Suggestions
+
+            • Explain Django Middleware
+
+            • Write Python code
+
+            • Generate SQL query
+
+            • Create React Component
+
+            • Explain AI
+
+            • Summarize text -->
+
+        </div>
+
+    </div>
+    <div class="typing" id="typing">
+
+        <div class="bubble">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </div>
+
+    </div>
+</div>
+<div class="chat-container">
+
+    <div class="chat-input">
+
+        <textarea id="message" placeholder="Ask Cognivra anything..."></textarea>
+
+        <button class="send-btn" id="sendBtn">
+
+            <i class="fa-solid fa-paper-plane"></i>
+
+        </button>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+    let deleteChatId = null;
+    let currentChat = null;
+
+    $("#newChatBtn").click(function () {
+
+        currentChat = null;
+
+        $(".messages").html("");
+
+        $("#message").focus();
+
+    });
+
+
+    $("#message").keypress(function (e) {
+
+        if (e.which === 13 && !e.shiftKey) {
+
+            e.preventDefault();
+
+            $("#sendBtn").click();
+
+        }
+
+    });
+
+
+    $(".chat-item").click(function () {
+
+        currentChat = $(this).data("id");
+
+        loadChat(currentChat);
+
+    });
+
+
+    function loadChat(chatId) {
+
+        $.get(
+
+            "/chat/" + chatId + "/",
+
+            function (res) {
+
+                $(".messages").html("");
+
+                res.forEach(function (msg) {
+
+                    addMessage(
+
+                        msg.role,
+
+                        msg.content
+
+                    );
+
+                });
+
+                scrollBottom();
+
+            }
+
+        );
+
+    }
+
+
+    function scrollBottom() {
+
+        $(".messages").scrollTop(
+
+            $(".messages")[0].scrollHeight
+
+        );
+
+    }
+
+    let currentChatId = null;
+
+    function escapeHtml(text) {
+
+        return $("<div>").text(text).html();
+
+    }
+
+    function scrollBottom() {
+
+        let obj = $("#messages");
+
+        obj.scrollTop(
+
+            obj[0].scrollHeight
+
+        );
+
+    }
+
+    function addUserMessage(message) {
+
+        $("#messages").append(
+
+            `
+        <div class="message user">
+
+            <div class="bubble">
+
+                ${escapeHtml(message)}
+
+            </div>
+
+        </div>
+        `
+
+        );
+
+        scrollBottom();
+
+    }
+
+    function addBotMessage(html) {
+
+        $("#messages").append(
+
+            `
+        <div class="message bot">
+
+            <div class="bubble">
+
+                ${html}
+
+            </div>
+
+        </div>
+        `
+
+        );
+
+        setTimeout(scrollBottom, 100);
+
+    }
+
+    function showWelcome() {
+
+        $("#messages").html(`
+
+    <div class="message bot">
+
+        <div class="bubble">
+
+            <h3>👋 Welcome to Cognivra your AI Assistant!</h3>
+           
+            How can i help you ?
+
+        </div>
+
+    </div>
+
+    `);
+
+    }
+    /*====================================
+            SEND MESSAGE
+    ====================================*/
+
+    function sendMessage() {
+
+        let message = $("#message").val().trim();
+
+        if (message === "")
+            return;
+
+        addUserMessage(message);
+
+        $("#message").val("");
+
+        showTyping();
+
+        setTimeout(scrollBottom, 100);
+
+        $.ajax({
+
+            url: "{% url 'ai_api' %}",
+
+            type: "POST",
+
+            contentType: "application/json",
+
+            headers: {
+
+                "X-CSRFToken": "{{ csrf_token }}"
+
+            },
+
+            data: JSON.stringify({
+
+                message: message,
+
+                chat_id: currentChatId
+
+            }),
+
+            success: function (response) {
+
+                hideTyping();
+
+                currentChatId = response.chat_id;
+
+                addBotMessage(
+
+                    smartRender(
+
+                        response.response
+
+                    )
+                );
+
+                refreshChatHistory();
+
+            },
+
+            error: function (xhr) {
+
+                hideTyping();
+
+                let msg = "Unable to process request.";
+
+                if (xhr.status == 500) {
+
+                    msg = "Internal Server Error";
+
+                }
+
+                if (xhr.status == 404) {
+
+                    msg = "API Not Found";
+
+                }
+
+                if (xhr.responseJSON) {
+
+                    if (xhr.responseJSON.error) {
+
+                        msg = xhr.responseJSON.error;
+
+                    }
+
+                }
+
+                addBotMessage(
+
+                    "<span style='color:#ff6b6b'>" + msg + "</span>"
+
+                );
+
+            }
+
+        });
+
+    }
+
+
+    /*====================================
+            BUTTON EVENTS
+    ====================================*/
+
+    $("#sendBtn").click(function () {
+
+        sendMessage();
+
+    });
+
+
+    $("#message").keydown(function (e) {
+
+        if (e.key === "Enter" && !e.shiftKey) {
+
+            e.preventDefault();
+
+            sendMessage();
+
+        }
+
+    });
+
+
+    /*====================================
+            LOAD CHAT
+    ====================================*/
+
+    function loadChat(chatId) {
+
+        currentChatId = chatId;
+
+        clearMessages();
+        let url = "{% url 'chat_messages' 0 %}";
+
+        url = url.replace("0", chatId);
+
+        $.get(
+
+            url,
+
+            function (data) {
+
+                data.forEach(function (msg) {
+
+                    if (msg.role === "user") {
+
+                        addUserMessage(msg.content);
+
+                    }
+                    else {
+
+                        addBotMessage(
+
+                            smartRender(msg.content)
+
+                        );
+
+                    }
+
+                });
+
+            }
+
+        );
+
+    }
+
+
+    /*====================================
+            REFRESH SIDEBAR
+    ====================================*/
+
+    function refreshChatHistory() {
+
+        // TODO
+
+        // Replace later using AJAX
+
+    }
+
+
+    /*====================================
+            CHAT CLICK
+    ====================================*/
+
+    $(document).on(
+
+        "click",
+
+        ".chat-item",
+
+        function () {
+
+            $(".chat-item").removeClass("active");
+
+            $(this).addClass("active");
+
+            loadChat(
+
+                $(this).data("id")
+
+            );
+
+        }
+
+    );
+
+
+    /*====================================
+            NEW CHAT
+    ====================================*/
+
+    $("#newChatBtn").click(function () {
+
+        currentChatId = null;
+
+        showWelcome();
+
+        $("#message").focus();
+
+    });
+
+
+    /*===========================================
+            SMART RESPONSE RENDERER
+    ===========================================*/
+
+    function smartRender(response) {
+
+        if (response === null || response === undefined) {
+
+            return "<i>No data available.</i>";
+
+        }
+
+        // Already object
+
+        if (typeof response === "object") {
+
+            return renderObject(response);
+
+        }
+
+        // Try parsing JSON string
+
+        try {
+
+            let obj = JSON.parse(response);
+
+            return renderObject(obj);
+
+        }
+        catch (e) {
+
+            return "<pre>" + escapeHtml(response) + "</pre>";
+
+        }
+
+    }
+
+
+    /*===========================================
+            OBJECT ROUTER
+    ===========================================*/
+
+    function renderObject(obj) {
+
+        if (Array.isArray(obj)) {
+
+            if (obj.length === 0) {
+
+                return "<i>No records found.</i>";
+
+            }
+
+            // Array of strings
+
+            if (typeof obj[0] === "string") {
+
+                return renderStringArray(obj);
+
+            }
+
+            // Array of objects
+
+            if (typeof obj[0] === "object") {
+
+                return renderTable(obj);
+
+            }
+
+        }
+
+        if (typeof obj === "object") {
+
+            return renderKeyValue(obj);
+
+        }
+
+        return "<pre>" + escapeHtml(String(obj)) + "</pre>";
+
+    }
+
+
+    /*===========================================
+            STRING ARRAY
+    ===========================================*/
+
+    function renderStringArray(arr) {
+
+        let html = "";
+
+        html += "<table>";
+
+        html += "<thead>";
+
+        html += "<tr>";
+
+        html += "<th>Value</th>";
+
+        html += "</tr>";
+
+        html += "</thead>";
+
+        html += "<tbody>";
+
+        arr.forEach(function (item) {
+
+            html += "<tr>";
+
+            html += "<td>" + escapeHtml(item) + "</td>";
+
+            html += "</tr>";
+
+        });
+
+        html += "</tbody>";
+
+        html += "</table>";
+
+        return html;
+
+    }
+
+
+    /*===========================================
+            ARRAY OF OBJECTS
+    ===========================================*/
+
+    function renderTable(rows) {
+
+        if (rows.length === 0) {
+
+            return "<i>No records found.</i>";
+
+        }
+
+        let headers = [];
+
+        let html = "<table>";
+
+        html += "<thead>";
+
+        html += "<tr>";
+
+        headers.forEach(function (col) {
+
+            html += "<th>" + formatHeader(col) + "</th>";
+
+        });
+
+        html += "</tr>";
+
+        html += "</thead>";
+
+        html += "<tbody>";
+
+        rows.forEach(function (row) {
+
+            Object.keys(row).forEach(function (key) {
+
+                if (!headers.includes(key))
+                    headers.push(key);
+
+            });
+
+        });
+
+        html += "</tbody>";
+
+        html += "</table>";
+
+        return html;
+
+    }
+
+
+    /*===========================================
+            KEY VALUE OBJECT
+    ===========================================*/
+
+    function renderKeyValue(obj) {
+
+        let html = "<table>";
+
+        html += "<tbody>";
+
+        Object.keys(obj).forEach(function (key) {
+
+            html += "<tr>";
+
+            html += "<th style='width:220px;'>";
+
+            html += formatHeader(key);
+
+            html += "</th>";
+
+            html += "<td>";
+
+            html += formatValue(obj[key]);
+
+            html += "</td>";
+
+            html += "</tr>";
+
+        });
+
+        html += "</tbody>";
+
+        html += "</table>";
+
+        return html;
+
+    }
+    /*===========================================
+            FORMAT HEADER
+    ===========================================*/
+
+    function formatHeader(text) {
+
+        return text
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, function (c) {
+                return c.toUpperCase();
+            });
+
+    }
+
+
+    /*===========================================
+            FORMAT VALUE
+    ===========================================*/
+
+    function formatValue(value) {
+
+        if (value === null || value === undefined) {
+
+            return "";
+
+        }
+
+        // Boolean
+
+        if (typeof value === "boolean") {
+
+            return value ? "Yes" : "No";
+
+        }
+
+        // Number
+
+        if (typeof value === "number") {
+
+            return value;
+
+        }
+
+        // String
+
+        if (typeof value === "string") {
+
+            // URL
+
+            if (value.startsWith("http://") || value.startsWith("https://")) {
+
+                return `
+                <a href="${value}"
+                   target="_blank"
+                   style="color:#19c37d">
+                    ${escapeHtml(value)}
+                </a>
+            `;
+            }
+
+            return escapeHtml(value);
+
+        }
+
+        // Array
+
+        if (Array.isArray(value)) {
+
+            if (value.length === 0) {
+
+                return "-";
+
+            }
+
+            // Array of Objects
+
+            if (typeof value[0] === "object") {
+
+                return renderTable(value);
+
+            }
+
+            // Array of Strings
+
+            return value.map(function (item) {
+
+                return escapeHtml(String(item));
+
+            }).join("<br>");
+
+        }
+
+        // Object
+
+        if (typeof value === "object") {
+
+            return renderKeyValue(value);
+
+        }
+
+        return escapeHtml(String(value));
+
+    }
+
+
+    /*===========================================
+            SHOW TYPING
+    ===========================================*/
+
+    function showTyping() {
+
+        $("#typing").fadeIn(150);
+
+        scrollBottom();
+
+    }
+
+
+    /*===========================================
+            HIDE TYPING
+    ===========================================*/
+
+    function hideTyping() {
+
+        $("#typing").fadeOut(150);
+
+    }
+
+
+    /*===========================================
+            CLEAR CHAT
+    ===========================================*/
+
+    function clearMessages() {
+
+        $("#messages").html("");
+
+    }
+
+
+    /*===========================================
+            COPY TO CLIPBOARD
+    ===========================================*/
+
+    function copyText(text) {
+
+        navigator.clipboard.writeText(text)
+
+            .then(() => {
+
+                console.log("Copied");
+
+            })
+
+            .catch(console.error);
+
+    }
+
+
+    /*===========================================
+            OPTIONAL ROW CLICK
+    ===========================================*/
+
+    $(document).on(
+
+        "click",
+
+        "table tbody tr",
+
+        function () {
+
+            $(this).toggleClass("selected");
+
+        }
+
+    );
+
+
+    /*===========================================
+            AUTO RESIZE TEXTAREA
+    ===========================================*/
+
+    $("#message").on(
+
+        "input",
+
+        function () {
+
+            this.style.height = "55px";
+
+            this.style.height = this.scrollHeight + "px";
+
+        }
+
+    );
+
+
+    /*===========================================
+            INITIALIZE
+    ===========================================*/
+
+    $(document).ready(function () {
+
+        showWelcome();
+        scrollBottom();
+        $("#message").focus();
+
+    });
+
+
+    $(document).on("click", ".delete-chat", function (e) {
+
+        e.stopPropagation();
+
+        deleteChatId = $(this).data("id");
+
+        $("#deleteModal").addClass("show");
+
+    });
+
+    $(document).on("click", ".rename-chat", function(e){
+
+    e.stopPropagation();
+
+    let chatId = $(this).data("id");
+
+    let currentTitle = $(this).data("title");
+
+    let title = prompt("Rename Chat", currentTitle);
+
+    if(title == null)
+        return;
+
+    title = title.trim();
+
+    if(title == "")
+        return;
+
+    $.ajax({
+
+        url:`/chat/${chatId}/rename/`,
+
+        type:"POST",
+
+        headers:{
+            "X-CSRFToken":"{{ csrf_token }}"
+        },
+
+        data:{
+            title:title
+        },
+
+        success:function(){
+
+            location.reload();
+
+        },
+
+        error:function(){
+
+            alert("Unable to rename chat.");
+
+        }
+
+    });
+
+});
+
+    $("#cancelDelete").click(function () {
+
+        $("#deleteModal").removeClass("show");
+
+        deleteChatId = null;
+
+    });
+    $("#confirmDelete").click(function () {
+
+        if (deleteChatId == null)
+            return;
+
+        let url = "{% url 'delete_chat' 0 %}";
+
+        url = url.replace("0", deleteChatId);
+
+        $.ajax({
+
+            url: url,
+
+            method: "POST",
+
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+
+            success: function () {
+
+                $(`.chat-item[data-id="${deleteChatId}"]`).remove();
+
+                if (currentChatId == deleteChatId) {
+
+                    currentChatId = null;
+
+                    showWelcome();
+
+                }
+
+                $("#deleteModal").removeClass("show");
+
+                deleteChatId = null;
+
+            },
+
+            error: function () {
+
+                alert("Unable to delete chat.");
+
+            }
+
+        });
+
+    });
+
+    $("#deleteModal").click(function (e) {
+
+        if (e.target.id == "deleteModal") {
+
+            $(this).removeClass("show");
+
+            deleteChatId = null;
+
+        }
+
+    });
+
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% for chat in chats %}
+
+<div class="chat-item" data-id="{{ chat.id }}">
+
+    <div class="chat-info">
+
+        <i class="fa-regular fa-comments"></i>
+
+        <span>{{ chat.title|truncatechars:35 }}</span>
+
+    </div>
+    <button class="delete-chat" data-id="{{ chat.id }}">
+        <i class="fa-solid fa-trash"></i>
+    </button>
+
+
+</div>
+
+{% empty %}
+
+<div class="empty-chat">
+    No chats yet
+</div>
+
+{% endfor %}

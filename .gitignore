@@ -1,0 +1,21 @@
+# Virtual environments
+venv/
+.venv/
+env/
+mcp_venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+
+# Environment
+.env
+
+# Local settings (optional)
+mcp_config/settings.py
+
+
+

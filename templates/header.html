@@ -1,0 +1,297 @@
+<header class="top-header">
+
+    <div class="header-left">
+
+        <h2>Cognivra AI Assistant <h6 style="font-size: 14px; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; color: #16a46a;">Knowledge. Context. Intelligence.</h6> </h2>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="profile-dropdown">
+
+            <button id="profileBtn" class="profile-btn">
+
+                <i class="fa-solid fa-user"></i>
+
+            </button>
+
+            <div id="profileMenu" class="profile-menu">
+
+                <div class="profile-info">
+
+                    <div class="profile-avatar">
+                        {{ request.user.username|first|upper }}
+
+                    </div>
+
+                    <div class="profile-name">
+
+                        {{ request.user.username }}
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <a href="{% url 'profile' %}" class="menu-item">
+
+                    <i class="fa-solid fa-user"></i>
+
+                    View Profile
+
+                </a>
+
+                <a href="{% url 'change_password' %}" class="menu-item">
+
+                    <i class="fa-solid fa-key"></i>
+
+                    Change Password
+
+                </a>
+
+                <a href="{% url 'logout' %}" class="logout-btn">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                    Logout
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+<style>
+    .top-header {
+
+        height: 65px;
+
+        background: #202123;
+
+        border-bottom: 1px solid #3b3b3b;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 0 25px;
+
+    }
+
+    .header-left h2 {
+
+        font-size: 22px;
+
+        color: white;
+
+    }
+
+    .header-right {
+
+        position: relative;
+
+    }
+
+    .profile-btn {
+
+        width: 45px;
+
+        height: 45px;
+
+        border: none;
+
+        border-radius: 50%;
+
+        background: #19c37d;
+
+        color: white;
+
+        cursor: pointer;
+
+        font-size: 18px;
+
+        transition: .25s;
+
+    }
+
+    .profile-btn:hover {
+
+        background: #16a46a;
+
+    }
+
+    .profile-menu {
+
+        position: absolute;
+
+        top: 58px;
+
+        right: 0;
+
+        width: 240px;
+
+        background: #2d2f34;
+
+        border-radius: 12px;
+
+        box-shadow: 0 10px 35px rgba(0, 0, 0, .35);
+
+        display: none;
+
+        overflow: hidden;
+
+        z-index: 9999;
+
+    }
+
+    .profile-menu.show {
+
+        display: block;
+
+    }
+
+    .profile-info {
+
+        padding: 20px;
+
+        text-align: center;
+
+    }
+
+    .profile-avatar {
+
+        width: 60px;
+
+        height: 60px;
+
+        margin: auto;
+
+        border-radius: 50%;
+
+        background: #19c37d;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        font-size: 24px;
+
+        font-weight: bold;
+
+        color: white;
+
+        margin-bottom: 10px;
+
+    }
+
+    .profile-name {
+
+        font-size: 16px;
+
+        font-weight: 600;
+
+        color: white;
+
+    }
+
+    .profile-menu hr {
+
+        border: none;
+
+        border-top: 1px solid #444;
+
+    }
+
+    .menu-item {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        padding: 15px 20px;
+
+        color: #ffffff;
+
+        text-decoration: none;
+
+        transition: .25s;
+
+        font-size: 15px;
+    }
+
+    .menu-item:hover {
+
+        background: #3d3f45;
+    }
+
+    .menu-item i {
+
+        width: 18px;
+
+        text-align: center;
+    }
+
+    .logout-btn {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        padding: 15px 20px;
+
+        color: #ff6b6b;
+
+        text-decoration: none;
+
+        transition: .25s;
+
+    }
+
+    .logout-btn:hover {
+
+        background: #3d3f45;
+
+    }
+</style>
+
+<script>
+
+    $(function () {
+
+        $("#profileBtn").click(function (e) {
+
+            e.stopPropagation();
+
+            $("#profileMenu").toggleClass("show");
+
+        });
+
+        $(document).click(function () {
+
+            $("#profileMenu").removeClass("show");
+
+        });
+
+        $("#profileMenu").click(function (e) {
+
+            e.stopPropagation();
+
+        });
+
+    });
+
+</script>

@@ -1,0 +1,525 @@
+{% extends "registration/login_base.html" %}
+
+{% block content %}
+
+<style>
+    html,
+    body {
+
+        margin: 0;
+
+        padding: 0;
+
+        min-height: 100%;
+
+        overflow-y: auto;
+
+        background: #343541;
+    }
+
+    .profile-wrapper {
+
+        min-height: calc(100vh - 65px);
+
+        width: 100%;
+
+        background: #343541;
+
+        padding: 30px 15px 40px;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: flex-start;
+
+        box-sizing: border-box;
+    }
+
+    .profile-card {
+
+        width: 100%;
+
+        max-width: 760px;
+
+        background: #202123;
+
+        padding: 40px;
+
+        border-radius: 18px;
+
+        box-shadow: 0 15px 40px rgba(0, 0, 0, .45);
+    }
+
+    .profile-avatar {
+
+        width: 90px;
+
+        height: 90px;
+
+        border-radius: 50%;
+
+        background: #19c37d;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        font-size: 34px;
+
+        margin: auto;
+
+        margin-bottom: 25px;
+    }
+
+    .profile-table {
+
+        width: 100%;
+
+        border-collapse: separate;
+
+        border-spacing: 0;
+
+        background: #2d2f34;
+
+        border: 1px solid #444;
+
+        border-radius: 14px;
+
+        overflow: hidden;
+
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .profile-table tr {
+
+        transition: background 0.25s ease;
+    }
+
+    .profile-table tr:nth-child(even) {
+
+        background: #32343a;
+    }
+
+    .profile-table tr:hover {
+
+        background: rgba(25, 195, 125, 0.08);
+    }
+
+    .profile-table td {
+
+        padding: 18px 22px;
+
+        border-bottom: 1px solid #444;
+
+        font-size: 15px;
+
+        color: #f3f4f6;
+
+        vertical-align: middle;
+    }
+
+    .profile-table tr:last-child td {
+
+        border-bottom: none;
+    }
+
+    .profile-table td:first-child {
+
+        width: 180px;
+
+        font-weight: 600;
+
+        color: #9ca3af;
+
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .profile-table td:last-child {
+
+        font-weight: 500;
+
+        color: #ffffff;
+    }
+
+    .main-chat-btn {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 10px;
+
+        width: 95%;
+
+        padding: 14px;
+
+        border-radius: 10px;
+
+        background: #19c37d;
+
+        color: #fff;
+
+        border: none;
+
+        text-decoration: none;
+
+        font-weight: 600;
+
+        transition: .25s;
+
+        margin: 15px;
+    }
+
+    .main-chat-btn:hover {
+
+        background: #16a46a;
+
+        color: #fff;
+    }
+
+    .form-control {
+
+        width: 100%;
+
+        padding: 12px 16px;
+
+        background: #40414f;
+
+        color: #ffffff;
+
+        border: 1px solid #555;
+
+        border-radius: 10px;
+
+        font-size: 15px;
+
+        font-weight: 500;
+
+        cursor: pointer;
+
+        outline: none;
+
+        appearance: none;
+
+        -webkit-appearance: none;
+
+        -moz-appearance: none;
+
+        transition: all .25s ease;
+
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
+
+        background-repeat: no-repeat;
+
+        background-position: right 15px center;
+
+        background-size: 14px;
+
+        padding-right: 45px;
+    }
+
+    .form-control:hover {
+
+        border-color: #19c37d;
+    }
+
+    .form-control:focus {
+
+        border-color: #19c37d;
+
+        box-shadow: 0 0 0 4px rgba(25, 195, 125, 0.2);
+    }
+
+    .form-control option {
+
+        background: #2d2f34;
+
+        color: #ffffff;
+
+        padding: 10px;
+    }
+
+    .assistant-form {
+
+        margin-top: 25px;
+    }
+
+    .form-group {
+
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+
+        display: block;
+
+        margin-bottom: 10px;
+
+        font-weight: 600;
+
+        color: #ffffff;
+    }
+
+    .messages {
+
+        margin: 20px 0;
+    }
+
+    .messages .success {
+
+        background: #19c37d;
+
+        color: #fff;
+
+        padding: 12px 16px;
+
+        border-radius: 8px;
+    }
+
+    .messages .error {
+
+        background: #e53935;
+
+        color: #fff;
+
+        padding: 12px 16px;
+
+        border-radius: 8px;
+    }
+
+    .assistant-box {
+
+        margin-top: 35px;
+
+        padding: 20px;
+
+        background: #2d2f34;
+
+        border-radius: 12px;
+
+        border: 1px solid #444;
+    }
+
+    .assistant-box h5 {
+
+        margin-bottom: 18px;
+
+        color: #fff;
+
+        font-size: 15px;
+    }
+
+    .profile-grid {
+
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 18px;
+
+        margin-top: 20px;
+    }
+
+    .profile-item {
+
+        background: #2d2f34;
+
+        border: 1px solid #444;
+
+        border-radius: 12px;
+
+        padding: 10px 15px;
+
+        transition: .25s;
+    }
+
+    .profile-item:hover {
+
+        border-color: #19c37d;
+
+        transform: translateY(-2px);
+    }
+
+    .profile-item .label {
+
+        display: block;
+
+        font-size: 10px;
+
+        color: #9ca3af;
+
+        margin-bottom: 8px;
+
+        text-transform: uppercase;
+
+        letter-spacing: .5px;
+    }
+
+    .profile-item .value {
+
+        display: block;
+
+        font-size: 15px;
+
+        color: #ffffff;
+
+        font-weight: 600;
+
+        word-break: break-word;
+    }
+
+    @media (max-width:768px) {
+
+        .profile-grid {
+
+            grid-template-columns: 1fr;
+        }
+
+        .profile-card {
+
+            padding: 25px;
+        }
+    }
+</style>
+
+{% include 'header.html' %}
+<div class="profile-wrapper">
+
+    <div class="profile-card">
+
+        <div class="profile-avatar">
+
+            {{ request.user.username|first|upper }}
+
+        </div>
+
+        <div class="profile-grid">
+
+            <div class="profile-item">
+                <span class="label">Username</span>
+                <span class="value">{{ request.user.username }}</span>
+            </div>
+
+            <div class="profile-item">
+                <span class="label">Email</span>
+                <span class="value">{{ request.user.email }}</span>
+            </div>
+
+            <div class="profile-item">
+                <span class="label">First Name</span>
+                <span class="value">{{ request.user.first_name|default:"-" }}</span>
+            </div>
+
+            <div class="profile-item">
+                <span class="label">Last Name</span>
+                <span class="value">{{ request.user.last_name|default:"-" }}</span>
+            </div>
+
+            <div class="profile-item">
+                <span class="label">Date Joined</span>
+                <span class="value">{{ request.user.date_joined|date:"d M Y, h:i A" }}</span>
+            </div>
+
+            <div class="profile-item">
+                <span class="label">Last Login</span>
+                <span class="value">{{ request.user.last_login|date:"d M Y, h:i A"|default:"-" }}</span>
+            </div>
+
+        </div>
+
+        {% if messages %}
+
+        <div class="messages">
+
+            {% for message in messages %}
+
+            <div class="{{ message.tags }}">
+
+                {{ message }}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+        <div class="row g-3 mt-3">
+
+            <div class="col-md-6">
+
+                <a href="{% url 'home' %}" class="main-chat-btn">
+
+                    <i class="fa-solid fa-house"></i>
+
+                    Home
+
+                </a>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <a href="{% url 'change_password' %}" class="main-chat-btn">
+
+                    <i class="fa-solid fa-key"></i>
+
+                    Change Password
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <form method="POST" class="assistant-box">
+
+            {% csrf_token %}
+
+            <div class="form-group">
+
+                <h5>
+
+                    <i class="fa-solid fa-robot"></i>
+
+                    Preferred Assistant
+
+                </h5>
+
+                <select name="assistant" id="assistant" class="form-control">
+
+                    {% for assistant in assistants %}
+
+                    <option value="{{ assistant.id }}" {% if current_assistant and assistant.id == current_assistant.id %}
+                        selected {% endif %}>
+                        {{ assistant.name|title }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="main-chat-btn">
+
+                <i class="fa-solid fa-floppy-disk"></i>
+
+                Save Preference
+
+            </button>
+
+        </form>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

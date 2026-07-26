@@ -1,0 +1,607 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>🤖MCP AI Assitant🤖| Powered by Groq</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Segoe UI, Arial, sans-serif;
+        }
+
+        body {
+            background: #202123;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+.top-header{
+
+    height:70px;
+
+    background:#202123;
+
+    border-bottom:1px solid #333;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 30px;
+}
+        .wrapper{
+
+    display:flex;
+
+    height:calc(100vh - 70px);
+}
+        /*=========================
+                SIDEBAR
+        =========================*/
+
+        .sidebar {
+
+            width: 280px;
+            background: #171717;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #2d2d2d;
+        }
+
+        .logo {
+
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .new-chat {
+
+            margin: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            cursor: pointer;
+            text-align: center;
+            transition: .3s;
+            background: #242424;
+        }
+
+        .new-chat:hover {
+
+            background: #343541;
+        }
+
+        .chat-history {
+
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            opacity: 1;
+
+            transition: .2s;
+
+            flex-shrink: 0;
+        }
+
+        .chat-item {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 10px;
+
+            padding: 12px;
+
+            margin-bottom: 8px;
+
+            background: #242424;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            transition: .3s;
+        }
+
+        .chat-item:hover,
+        .chat-actions {
+
+            background: #343541;
+        }
+
+        .chat-item:hover .delete-chat {
+
+            opacity: 1;
+        }
+
+        .chat-info {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .chat-info span {
+
+            flex: 1;
+
+            overflow: hidden;
+
+            white-space: nowrap;
+
+            text-overflow: ellipsis;
+        }
+
+        .rename-chat,
+        .delete-chat {
+
+            width: 30px;
+
+            height: 30px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border: none;
+
+            border-radius: 6px;
+
+            background: transparent;
+
+            cursor: pointer;
+
+            transition: .2s;
+
+            font-size: 14px;
+        }
+
+        .rename-chat {
+
+            color: #ffffff;
+        }
+
+        .rename-chat:hover {
+
+            background: #3b82f6;
+
+            color: #ffffff;
+        }
+
+        .delete-chat {
+
+            color: #ff4d4f;
+        }
+
+        .delete-chat:hover {
+
+            background: #ff4d4f;
+
+            color: #ffffff;
+        }
+
+        /*=========================
+              MAIN CONTENT
+        =========================*/
+
+        .content {
+
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #343541;
+        }
+
+        .page-title {
+
+            padding: 18px;
+            border-bottom: 1px solid #444;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .messages {
+
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .message {
+
+            margin-bottom: 25px;
+            display: flex;
+        }
+
+        .user {
+
+            justify-content: flex-end;
+        }
+
+        .bot {
+
+            justify-content: flex-start;
+        }
+
+        .bubble {
+
+            max-width: 75%;
+            padding: 15px 18px;
+            border-radius: 12px;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .user .bubble {
+
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .bot .bubble {
+
+            background: #444654;
+            color: #fff;
+        }
+
+        .typing {
+
+            display: none;
+            margin-bottom: 25px;
+        }
+
+        .typing span {
+
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            display: inline-block;
+            background: #aaa;
+            border-radius: 50%;
+            animation: blink 1.4s infinite;
+        }
+
+        .typing span:nth-child(2) {
+
+            animation-delay: .2s;
+        }
+
+        .typing span:nth-child(3) {
+
+            animation-delay: .4s;
+        }
+
+        @keyframes blink {
+
+            0% {
+                opacity: .2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: .2;
+            }
+        }
+
+        /*=========================
+                INPUT
+        =========================*/
+
+        .chat-input {
+
+            padding: 20px;
+            border-top: 1px solid #444;
+            display: flex;
+            gap: 15px;
+            background: #343541;
+        }
+
+        .chat-input textarea {
+
+            flex: 1;
+            resize: none;
+            height: 55px;
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            padding: 15px;
+            background: #40414f;
+            color: white;
+            font-size: 15px;
+        }
+
+        .send-btn {
+
+            width: 60px;
+            border: none;
+            background: #19c37d;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .send-btn:hover {
+
+            background: #16a46a;
+        }
+
+        table {
+
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th {
+
+            background: #19c37d;
+            color: white;
+            padding: 10px;
+        }
+
+        table td {
+
+            border: 1px solid #666;
+            padding: 10px;
+            background: #555;
+        }
+
+        pre {
+
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @media(max-width:900px) {
+
+            .sidebar {
+
+                display: none;
+            }
+
+            .bubble {
+
+                max-width: 95%;
+            }
+
+        }
+
+        .modal {
+
+            position: fixed;
+
+            inset: 0;
+
+            display: none;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background: rgba(0, 0, 0, .6);
+
+            z-index: 999999;
+        }
+
+        .modal.show {
+
+            display: flex;
+        }
+
+        .modal-content {
+
+            width: 420px;
+
+            max-width: 90%;
+
+            background: #2f3136;
+
+            border-radius: 16px;
+
+            padding: 30px;
+
+            text-align: center;
+
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+
+            animation: popup .2s ease;
+        }
+
+
+        .modal-icon {
+
+            font-size: 45px;
+
+            color: #ff4d4f;
+
+            margin-bottom: 15px;
+        }
+
+        .modal-content h3 {
+
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+
+            color: #bbb;
+
+            margin-bottom: 30px;
+        }
+
+        .modal-buttons {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 15px;
+        }
+
+        .btn-cancel {
+
+            padding: 10px 25px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            background: #555;
+
+            color: white;
+        }
+
+        .btn-delete {
+
+            padding: 10px 25px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            background: #ff4d4f;
+
+            color: white;
+        }
+
+        .btn-delete:hover {
+
+            background: #e53935;
+        }
+
+        .btn-cancel:hover {
+
+            background: #666;
+        }
+
+        @keyframes popup {
+
+            from {
+
+                transform: scale(.8);
+
+                opacity: 0;
+            }
+
+            to {
+
+                transform: scale(1);
+
+                opacity: 1;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="wrapper">
+
+        {% include 'sidebar.html' %}
+
+        <div class="content">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+    <div id="deleteModal" class="modal">
+
+        <div class="modal-content">
+
+            <div class="modal-icon">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+
+            <h3>Delete Chat</h3>
+
+            <p>
+                Are you sure you want to delete this conversation?
+            </p>
+
+            <div class="modal-buttons">
+
+                <button id="cancelDelete" class="btn-cancel">
+
+                    Cancel
+
+                </button>
+
+                <button id="confirmDelete" class="btn-delete">
+
+                    Delete
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% block scripts %}
+    {% endblock %}
+
+    {% include 'footer.html' %}
+
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<div class="sidebar">
+    <div class="new-chat" id="newChatBtn">
+        <i class="fa-solid fa-plus"></i>
+        New Chat
+    </div>
+
+    <div class="chat-history" id="chatHistory">
+
+        {% if chats %}
+
+        {% for chat in chats %}
+
+        <div class="chat-item" data-id="{{ chat.id }}">
+
+            <div class="chat-info">
+
+                <i class="fa-regular fa-comments"></i>
+
+                <span>{{ chat.title|truncatechars:30 }}</span>
+
+            </div>
+
+            <div class="chat-actions">
+
+                <button class="rename-chat" data-id="{{ chat.id }}" data-title="{{ chat.title }}" title="Rename">
+
+                    <i class="fa-solid fa-pen"></i>
+
+                </button>
+
+                <button class="delete-chat" data-id="{{ chat.id }}" title="Delete">
+
+                    <i class="fa-solid fa-trash"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+        {% else %}
+
+        <div style="padding:20px;text-align:center;color:#aaa">
+
+            No conversations
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
